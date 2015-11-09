@@ -42,3 +42,51 @@ cp res/local.conf conf/local.conf
 # build image:
 bitbake core-image-full-cmdline
 ```
+
+Burn Niobium
+============
+
+Insert SD card into system, erase it's content and peform the following commands to copy the Niobium build onto it:
+
+```
+dmesg | tail
+sudo fdisk /dev/sdb
+n, p, 1, 2048, +32M
+n, p, 2, 67584, 7774207
+a, 1, t, 1, c
+w
+
+sudo mkfs.vfat -n "BOOT" /dev/sdb1
+sudo mkfs.ext4 -L "ROOT" /dev/sdb2
+
+cd tmp/deploy/images/beaglebone/
+
+sudo cp MLO-beaglebone /media/rkylberg/BOOT/MLO
+sudo cp u-boot.img /media/rkylberg/BOOT/
+sudo cp zImage-beaglebone.bin /media/rkylberg/BOOT/zImage
+sudo cp zImage-am335x-boneblack.dtb /media/rkylberg/BOOT/
+
+sudo tar -xf core-image-full-cmdline-beaglebone.tar.bz2 -C /media/rkylberg/ROOT/
+sudo tar -xf modules-beaglebone.tgz -C /media/rkylberg/ROOT
+sudo cp zImage-am335x-bone.dtb /media/rkylberg/ROOT/boot/am335x-bone.dtb
+sudo cp zImage-am335x-boneblack.dtb /media/rkylberg/ROOT/boot/am335x-boneblack.dtb
+```
+
+Boot Niobium
+============
+
+1. Insert SD card into beaglebone.
+1. Attach FTDI cable between beaglebone and host computer.
+1. Configure host serial program: 115,200 baud, 8 bits, N parity, 1 stop bit, no handshake
+1. Connect network connected ethernet cable to beaglebone.
+1. Connect power to the beaglebone while holding the SD card boot switch.
+1. Release the boot switch when serial program starts logging boot messages.
+1. Examine the boot messages in order to determine the ip address assigned to the beaglebone.
+
+Niobium Log-in
+==============
+
+From serial port, no password is needed to login as user root.
+
+From host terminal, no password is needed to login as user root with this command: ```ssh root@192.168.0.18```
+
